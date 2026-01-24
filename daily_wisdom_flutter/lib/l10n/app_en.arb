@@ -1,0 +1,13 @@
+{
+  "@@locale": "en",
+  "appTitle": "Daily Wisdom",
+  "newQuote": "New Quote",
+  "advertisement": "ADVERTISEMENT",
+  "adPlaceholder": "Ad space - AdMob / Google Ads",
+  "likeQuote": "Like quote",
+  "copyQuote": "Copy quote",
+  "shareQuote": "Share quote",
+  "copiedToClipboard": "Copied to clipboard",
+  "notifications": "Notifications",
+  "settings": "Settings"
+}

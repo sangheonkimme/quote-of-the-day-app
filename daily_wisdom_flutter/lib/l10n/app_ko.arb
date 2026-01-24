@@ -1,0 +1,13 @@
+{
+  "@@locale": "ko",
+  "appTitle": "오늘의 명언",
+  "newQuote": "새 명언",
+  "advertisement": "광고",
+  "adPlaceholder": "광고 영역 - AdMob / Google Ads",
+  "likeQuote": "명언 좋아요",
+  "copyQuote": "명언 복사",
+  "shareQuote": "명언 공유",
+  "copiedToClipboard": "클립보드에 복사됨",
+  "notifications": "알림",
+  "settings": "설정"
+}
