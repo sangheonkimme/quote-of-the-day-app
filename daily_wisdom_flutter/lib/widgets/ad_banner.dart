@@ -1,60 +1,101 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/theme.dart';
 
-class AdBanner extends StatelessWidget {
+class AdBanner extends StatefulWidget {
   const AdBanner({super.key});
+
+  @override
+  State<AdBanner> createState() => _AdBannerState();
+}
+
+class _AdBannerState extends State<AdBanner> {
+  BannerAd? _bannerAd;
+  bool _isLoaded = false;
+
+  // Production Ad Unit ID
+  static const String _adUnitId = 'ca-app-pub-6553106832525632/6378216132';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
+
+  void _loadAd() {
+    _bannerAd = BannerAd(
+      adUnitId: _adUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('BannerAd failed to load: $error');
+          ad.dispose();
+        },
+      ),
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
 
     return Padding(
-      // mx-6 mb-4 → horizontal 24, bottom 16
       padding: const EdgeInsets.only(
         left: AppDimensions.spacing24,
         right: AppDimensions.spacing24,
         bottom: AppDimensions.spacing16,
       ),
       child: Container(
-        // bg-secondary rounded-xl p-4 text-center border border-border
-        padding: const EdgeInsets.all(AppDimensions.spacing16),
+        padding: const EdgeInsets.all(AppDimensions.spacing8),
         decoration: BoxDecoration(
           color: AppColors.secondary,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd), // 12px
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           border: Border.all(color: AppColors.border),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // text-[10px] text-muted-foreground uppercase tracking-wider mb-1
             Text(
               locale == 'ko' ? '광고' : 'ADVERTISEMENT',
               style: TextStyle(
-                fontSize: AppTypography.text10, // 10px
+                fontSize: AppTypography.text10,
                 fontWeight: FontWeight.w400,
                 color: AppColors.mutedForeground,
-                letterSpacing: AppTypography.trackingWider, // 0.5
+                letterSpacing: AppTypography.trackingWider,
               ),
             ),
-            const SizedBox(height: AppDimensions.spacing4), // mb-1
-
-            // h-12 flex items-center justify-center
-            SizedBox(
-              height: AppDimensions.iconXl, // 48px
-              child: Center(
-                // text-xs text-muted-foreground
-                child: Text(
-                  locale == 'ko'
-                      ? '광고 영역 - AdMob / Google Ads'
-                      : 'Ad space - AdMob / Google Ads',
-                  style: const TextStyle(
-                    fontSize: AppTypography.textXs,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.mutedForeground,
+            const SizedBox(height: AppDimensions.spacing4),
+            if (_isLoaded && _bannerAd != null)
+              SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              )
+            else
+              SizedBox(
+                height: 50,
+                child: Center(
+                  child: Text(
+                    locale == 'ko' ? '광고 로딩 중...' : 'Loading ad...',
+                    style: const TextStyle(
+                      fontSize: AppTypography.textXs,
+                      color: AppColors.mutedForeground,
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

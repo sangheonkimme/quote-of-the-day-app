@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.dailywisdom.app"
+        applicationId = "com.railit.dailywisdom"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
