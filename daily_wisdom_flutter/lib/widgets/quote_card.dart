@@ -16,13 +16,14 @@ class QuoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quoteFontSize = AppTheme.getQuoteFontSize(context);
+    // Always use larger font size (24sp) for mobile as shown in design
+    const quoteFontSize = AppTypography.text2xl;
 
     return Center(
       child: AnimatedOpacity(
         opacity: isAnimating ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 500), // duration-500
-        curve: Curves.easeOut, // ease-out
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
         child: AnimatedScale(
           scale: isAnimating ? 0.95 : 1.0,
           duration: const Duration(milliseconds: 500),
@@ -30,36 +31,34 @@ class QuoteCard extends StatelessWidget {
           child: Container(
             width: double.infinity,
             constraints: const BoxConstraints(
-              maxWidth: AppDimensions.maxWidthMd, // max-w-md = 448px
+              maxWidth: AppDimensions.maxWidthMd,
             ),
-            padding: const EdgeInsets.all(AppDimensions.spacing32), // p-8
+            padding: const EdgeInsets.all(AppDimensions.spacing32),
             decoration: BoxDecoration(
-              color: AppColors.card, // bg-card
-              borderRadius: BorderRadius.circular(AppDimensions.radiusLg), // rounded-2xl
-              border: Border.all(color: AppColors.border), // border border-border
-              boxShadow: AppShadows.shadowSm, // shadow-sm
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+              border: Border.all(color: AppColors.border),
+              boxShadow: AppShadows.shadowSm,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Quote Icon (") - SVG
-                // w-10 h-10 text-muted-foreground/30
+                // Quote Icon - larger size (48px) to match design
                 SizedBox(
-                  width: AppDimensions.iconLg, // 40px
-                  height: AppDimensions.iconLg, // 40px
+                  width: 48,
+                  height: 48,
                   child: SvgPicture.asset(
                     'assets/icons/quote.svg',
                     colorFilter: ColorFilter.mode(
-                      AppColors.mutedForeground.withValues(alpha: 0.3), // /30
+                      AppColors.mutedForeground.withValues(alpha: 0.3),
                       BlendMode.srcIn,
                     ),
                   ),
                 ),
-                const SizedBox(height: AppDimensions.spacing24), // mb-6
+                const SizedBox(height: AppDimensions.spacing24),
 
-                // Quote Text
-                // text-xl md:text-2xl font-serif leading-relaxed text-foreground
+                // Quote Text - 24sp as shown in design
                 Text(
                   quote.text,
                   style: GoogleFonts.playfairDisplay(
@@ -69,35 +68,30 @@ class QuoteCard extends StatelessWidget {
                     height: AppTypography.leadingRelaxed,
                   ),
                 ),
-                const SizedBox(height: AppDimensions.spacing24), // mb-6
+                const SizedBox(height: AppDimensions.spacing24),
 
                 // Author & Category
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // text-sm font-medium text-foreground
-                        Text(
-                          quote.author,
-                          style: const TextStyle(
-                            fontSize: AppTypography.textSm,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.foreground,
-                          ),
-                        ),
-                        const SizedBox(height: AppDimensions.spacing2), // mt-0.5
-                        // text-xs text-muted-foreground
-                        Text(
-                          quote.category,
-                          style: const TextStyle(
-                            fontSize: AppTypography.textXs,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.mutedForeground,
-                          ),
-                        ),
-                      ],
+                    // Author - 16sp bold
+                    Text(
+                      quote.author,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.foreground,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.spacing4),
+                    // Category - 14sp
+                    Text(
+                      quote.category,
+                      style: const TextStyle(
+                        fontSize: AppTypography.textSm,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.mutedForeground,
+                      ),
                     ),
                   ],
                 ),

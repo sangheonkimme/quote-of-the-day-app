@@ -76,16 +76,14 @@ class _ActionButtonsState extends State<ActionButtons>
 
   @override
   Widget build(BuildContext context) {
-    final showText = AppTheme.showButtonText(context);
     final locale = Localizations.localeOf(context).languageCode;
 
     return Padding(
-      padding: const EdgeInsets.only(top: AppDimensions.spacing32), // mt-8
+      padding: const EdgeInsets.only(top: AppDimensions.spacing32),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, // justify-center
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // New Quote Button
-          // rounded-full px-6 gap-2 bg-transparent, variant="outline" size="lg"
+          // New Quote Button - always show text
           _OutlineButton(
             onTap: widget.isRefreshing ? null : widget.onRefresh,
             child: Row(
@@ -93,37 +91,35 @@ class _ActionButtonsState extends State<ActionButtons>
               children: [
                 RotationTransition(
                   turns: _refreshController,
-                  child: Icon(
+                  child: const Icon(
                     LucideIcons.refreshCw,
-                    size: AppDimensions.iconSm, // 16px
+                    size: 18,
                     color: AppColors.foreground,
                   ),
                 ),
-                if (showText) ...[
-                  const SizedBox(width: AppDimensions.spacing8), // gap-2
-                  Text(
-                    locale == 'ko' ? '새 명언' : 'New Quote',
-                    style: const TextStyle(
-                      fontSize: AppTypography.textSm,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.foreground,
-                    ),
+                const SizedBox(width: 10),
+                Text(
+                  locale == 'ko' ? '새 명언' : 'New Quote',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.foreground,
                   ),
-                ],
+                ),
               ],
             ),
           ),
-          const SizedBox(width: AppDimensions.spacing12), // gap-3
+          const SizedBox(width: 12),
 
           // Heart Button
           _CircularIconButton(
-            icon: widget.isLiked ? LucideIcons.heart : LucideIcons.heart,
+            icon: LucideIcons.heart,
             filled: widget.isLiked,
             fillColor: AppColors.heartRed,
             onTap: widget.onLike,
             semanticLabel: 'Like quote',
           ),
-          const SizedBox(width: AppDimensions.spacing12),
+          const SizedBox(width: 12),
 
           // Copy Button
           _CircularIconButton(
@@ -132,7 +128,7 @@ class _ActionButtonsState extends State<ActionButtons>
             onTap: _handleCopy,
             semanticLabel: 'Copy quote',
           ),
-          const SizedBox(width: AppDimensions.spacing12),
+          const SizedBox(width: 12),
 
           // Share Button
           _CircularIconButton(
@@ -159,15 +155,13 @@ class _OutlineButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.buttonHeightLg / 2),
+      borderRadius: BorderRadius.circular(25),
       child: Container(
-        height: AppDimensions.buttonHeightLg, // 44px
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.spacing24, // px-6
-        ),
+        height: 50, // Larger button
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppDimensions.buttonHeightLg / 2),
+          borderRadius: BorderRadius.circular(25),
           border: Border.all(color: AppColors.border),
         ),
         alignment: Alignment.center,
@@ -237,10 +231,10 @@ class _CircularIconButtonState extends State<_CircularIconButton>
       button: true,
       child: InkWell(
         onTap: widget.onTap,
-        borderRadius: BorderRadius.circular(AppDimensions.buttonSizeLg / 2),
+        borderRadius: BorderRadius.circular(25),
         child: Container(
-          width: AppDimensions.buttonSizeLg, // 48px
-          height: AppDimensions.buttonSizeLg, // 48px
+          width: 50, // Larger circular button
+          height: 50,
           decoration: BoxDecoration(
             color: Colors.transparent,
             shape: BoxShape.circle,
@@ -251,7 +245,7 @@ class _CircularIconButtonState extends State<_CircularIconButton>
             scale: _scaleAnimation,
             child: Icon(
               widget.icon,
-              size: AppDimensions.iconMd, // 20px
+              size: 22, // Larger icon
               color: widget.iconColor ??
                   (widget.filled ? widget.fillColor : AppColors.foreground),
               fill: widget.filled ? 1.0 : 0.0,

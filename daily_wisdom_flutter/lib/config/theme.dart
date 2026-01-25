@@ -46,8 +46,8 @@ class AppDimensions {
   static const double buttonSizeLg = 48.0;  // w-12 h-12
   static const double buttonHeightLg = 44.0; // size="lg"
 
-  // Breakpoints
-  static const double breakpointSm = 640.0;
+  // Breakpoints (adjusted for mobile)
+  static const double breakpointSm = 360.0;  // Show button text on most phones
   static const double breakpointMd = 768.0;
 
   // Max Width
