@@ -5,13 +5,14 @@ import { Quote } from "@/lib/quotes";
 import { RefreshCw, Share2, Heart, Copy, Check } from "lucide-react";
 import { useState } from "react";
 
-interface ActionButtonsProps {
+export interface ActionButtonsProps {
   quote: Quote;
   onRefresh: () => void;
   isRefreshing?: boolean;
+  newQuoteLabel?: string;
 }
 
-export function ActionButtons({ quote, onRefresh, isRefreshing }: ActionButtonsProps) {
+export function ActionButtons({ quote, onRefresh, isRefreshing, newQuoteLabel = "New Quote" }: ActionButtonsProps) {
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -55,7 +56,7 @@ export function ActionButtons({ quote, onRefresh, isRefreshing }: ActionButtonsP
         className="rounded-full px-6 gap-2 bg-transparent"
       >
         <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-        <span className="hidden sm:inline">New Quote</span>
+        <span className="hidden sm:inline">{newQuoteLabel}</span>
       </Button>
 
       {/* Like Button */}

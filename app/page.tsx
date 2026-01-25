@@ -7,8 +7,10 @@ import { ActionButtons } from "@/components/action-buttons";
 import { AppHeader } from "@/components/app-header";
 import { AdBanner } from "@/components/ad-banner";
 import { getDailyQuote, getRandomQuote, Quote } from "@/lib/quotes";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function Home() {
+  const { locale, setLocale, t } = useI18n();
   const [quote, setQuote] = useState<Quote>(getDailyQuote);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -24,15 +26,29 @@ export default function Home() {
     }, 300);
   }, []);
 
+  const toggleLocale = () => {
+    setLocale(locale === "en" ? "ko" : "en");
+  };
+
   return (
     <main className="min-h-screen bg-muted py-8 px-4">
+      {/* Language Toggle */}
+      <div className="absolute top-4 right-4">
+        <button
+          onClick={toggleLocale}
+          className="px-3 py-1.5 text-sm bg-card border border-border rounded-lg hover:bg-muted transition-colors cursor-pointer"
+        >
+          {locale === "en" ? "한국어" : "English"}
+        </button>
+      </div>
+
       {/* Page Header */}
       <div className="text-center mb-8">
         <h1 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
-          Quote of the Day App
+          {t.pageTitle}
         </h1>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
-          Flutter app design prototype - Minimal and clean UI for daily inspirational quotes
+          {t.pageDescription}
         </p>
       </div>
 
@@ -40,55 +56,66 @@ export default function Home() {
       <MobileFrame>
         <div className="flex flex-col h-full">
           {/* App Header */}
-          <AppHeader />
+          <AppHeader title={t.appHeader} />
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col justify-center px-4 py-6">
-            <QuoteCard quote={quote} isAnimating={isAnimating} />
+            <QuoteCard quote={quote} isAnimating={isAnimating} locale={locale} />
             <ActionButtons
               quote={quote}
               onRefresh={handleRefresh}
               isRefreshing={isRefreshing}
+              newQuoteLabel={t.newQuote}
             />
           </div>
 
           {/* Ad Banner (placeholder for monetization) */}
-          <AdBanner />
+          <AdBanner label={t.adLabel} />
         </div>
       </MobileFrame>
 
       {/* Feature Notes */}
       <div className="mt-12 max-w-2xl mx-auto">
         <h2 className="text-lg font-semibold text-foreground mb-4 text-center">
-          MVP Features
+          {t.mvpFeatures}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FeatureCard
-            title="Quote of the Day"
-            description="Display a fresh inspirational quote each day based on date"
+            title={t.features.quoteOfDay.title}
+            description={t.features.quoteOfDay.description}
           />
           <FeatureCard
-            title="Random Refresh"
-            description="Tap to get a new random quote from the collection"
+            title={t.features.randomRefresh.title}
+            description={t.features.randomRefresh.description}
           />
           <FeatureCard
-            title="Share Feature"
-            description="Native share or copy to clipboard functionality"
+            title={t.features.share.title}
+            description={t.features.share.description}
           />
           <FeatureCard
-            title="Push Notifications"
-            description="Daily quote notification at 8 AM"
+            title={t.features.notifications.title}
+            description={t.features.notifications.description}
           />
           <FeatureCard
-            title="Ad Monetization"
-            description="Banner ad placement for revenue"
+            title={t.features.ads.title}
+            description={t.features.ads.description}
           />
           <FeatureCard
-            title="1,000+ Quotes"
-            description="Large collection of curated quotes"
+            title={t.features.quotes.title}
+            description={t.features.quotes.description}
           />
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="mt-12 text-center">
+        <a
+          href="/privacy"
+          className="text-muted-foreground hover:text-foreground text-sm underline"
+        >
+          {t.privacyPolicy}
+        </a>
+      </footer>
     </main>
   );
 }

@@ -3,11 +3,15 @@
 import { Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function AppHeader() {
+interface AppHeaderProps {
+  title?: string;
+}
+
+export function AppHeader({ title = "Daily Wisdom" }: AppHeaderProps) {
   return (
     <header className="flex items-center justify-between px-6 py-4">
       <div>
-        <h1 className="text-lg font-semibold text-foreground">Daily Wisdom</h1>
+        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
         <p className="text-xs text-muted-foreground">
           {new Date().toLocaleDateString('en-US', { 
             weekday: 'long',

@@ -3,12 +3,13 @@
 import { Quote } from "@/lib/quotes";
 import { cn } from "@/lib/utils";
 
-interface QuoteCardProps {
+export interface QuoteCardProps {
   quote: Quote;
   isAnimating?: boolean;
+  locale?: "en" | "ko";
 }
 
-export function QuoteCard({ quote, isAnimating }: QuoteCardProps) {
+export function QuoteCard({ quote, isAnimating, locale = "en" }: QuoteCardProps) {
   return (
     <div
       className={cn(
@@ -32,7 +33,7 @@ export function QuoteCard({ quote, isAnimating }: QuoteCardProps) {
 
         {/* Quote Text */}
         <blockquote className="text-xl md:text-2xl font-serif leading-relaxed text-foreground mb-6 text-balance">
-          {quote.text}
+          {locale === "ko" && quote.text_ko ? quote.text_ko : quote.text}
         </blockquote>
 
         {/* Author & Category */}
