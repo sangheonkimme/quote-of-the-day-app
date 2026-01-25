@@ -85,8 +85,8 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-semibold text-foreground mb-3">Contact</h2>
             <p className="text-muted-foreground">
               For questions about this privacy policy, contact us at:{" "}
-              <a href="mailto:dailywisdom.app@gmail.com" className="text-blue-600 hover:underline">
-                dailywisdom.app@gmail.com
+              <a href="mailto:railit.biz@gmail.com" className="text-blue-600 hover:underline">
+                railit.biz@gmail.com
               </a>
             </p>
           </section>
@@ -157,8 +157,8 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-semibold text-foreground mb-3">문의</h2>
             <p className="text-muted-foreground">
               개인정보처리방침에 관한 문의:{" "}
-              <a href="mailto:dailywisdom.app@gmail.com" className="text-blue-600 hover:underline">
-                dailywisdom.app@gmail.com
+              <a href="mailto:railit.biz@gmail.com" className="text-blue-600 hover:underline">
+                railit.biz@gmail.com
               </a>
             </p>
           </section>
