@@ -7,7 +7,7 @@ import '../widgets/app_header.dart';
 import '../widgets/quote_card.dart';
 import '../widgets/action_buttons.dart';
 import '../widgets/ad_banner.dart';
-import 'favorites_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -80,11 +80,11 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // App Header
             AppHeader(
-              onFavoritesTap: () {
+              onSettingsTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const FavoritesScreen(),
+                    builder: (context) => const SettingsScreen(),
                   ),
                 );
               },
