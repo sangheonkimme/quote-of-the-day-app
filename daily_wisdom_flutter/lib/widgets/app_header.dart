@@ -5,12 +5,12 @@ import '../config/theme.dart';
 
 class AppHeader extends StatelessWidget {
   final VoidCallback? onNotificationTap;
-  final VoidCallback? onSettingsTap;
+  final VoidCallback? onFavoritesTap;
 
   const AppHeader({
     super.key,
     this.onNotificationTap,
-    this.onSettingsTap,
+    this.onFavoritesTap,
   });
 
   @override
@@ -68,11 +68,11 @@ class AppHeader extends StatelessWidget {
                 semanticLabel: 'Notifications',
               ),
               const SizedBox(width: AppDimensions.spacing8), // gap-2
-              // Settings Button
+              // Favorites Button
               _GhostIconButton(
-                icon: LucideIcons.settings,
-                onTap: onSettingsTap,
-                semanticLabel: 'Settings',
+                icon: LucideIcons.heart,
+                onTap: onFavoritesTap,
+                semanticLabel: 'Favorites',
               ),
             ],
           ),

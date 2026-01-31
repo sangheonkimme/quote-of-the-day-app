@@ -7,6 +7,7 @@ import '../widgets/app_header.dart';
 import '../widgets/quote_card.dart';
 import '../widgets/action_buttons.dart';
 import '../widgets/ad_banner.dart';
+import 'favorites_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -78,7 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             // App Header
-            const AppHeader(),
+            AppHeader(
+              onFavoritesTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FavoritesScreen(),
+                  ),
+                );
+              },
+            ),
 
             // Main Content - Quote Card + Action Buttons
             Expanded(
