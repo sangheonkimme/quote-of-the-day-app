@@ -113,7 +113,7 @@ class _ActionButtonsState extends State<ActionButtons>
 
           // Heart Button
           _CircularIconButton(
-            icon: LucideIcons.heart,
+            icon: widget.isLiked ? Icons.favorite : Icons.favorite_border,
             filled: widget.isLiked,
             fillColor: AppColors.heartRed,
             onTap: widget.onLike,
