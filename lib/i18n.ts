@@ -25,8 +25,8 @@ export const translations = {
         description: "Banner ad placement for revenue",
       },
       quotes: {
-        title: "1,000+ Quotes",
-        description: "Large collection of curated quotes",
+        title: "200+ Quotes",
+        description: "Curated collection of inspiring quotes",
       },
     },
     privacyPolicy: "Privacy Policy",
@@ -60,8 +60,8 @@ export const translations = {
         description: "수익을 위한 배너 광고 배치",
       },
       quotes: {
-        title: "1,000개 이상의 명언",
-        description: "엄선된 명언 컬렉션",
+        title: "200개 이상의 명언",
+        description: "영감을 주는 엄선된 명언 컬렉션",
       },
     },
     privacyPolicy: "개인정보처리방침",
