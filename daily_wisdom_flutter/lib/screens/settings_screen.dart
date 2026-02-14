@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/theme.dart';
+import '../services/notification_service.dart';
 import 'favorites_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -14,6 +16,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = false;
+  final NotificationService _notificationService = NotificationService.instance;
 
   @override
   void initState() {
@@ -24,16 +27,72 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? false;
+      _notificationsEnabled =
+          prefs.getBool(NotificationService.notificationsEnabledKey) ?? false;
     });
   }
 
   Future<void> _toggleNotifications(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notifications_enabled', value);
+    final locale = Localizations.localeOf(context).languageCode;
+    final normalizedLocale = locale == 'ko' ? 'ko' : 'en';
+
+    if (value) {
+      final enabled = await _notificationService.enableDailyQuoteNotifications(
+        locale: normalizedLocale,
+      );
+      if (!mounted) {
+        return;
+      }
+
+      if (!enabled) {
+        setState(() {
+          _notificationsEnabled = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              locale == 'ko'
+                  ? '알림 권한이 필요합니다. 설정에서 권한을 허용해주세요.'
+                  : 'Notification permission is required. Please allow it in settings.',
+            ),
+          ),
+        );
+        return;
+      }
+    } else {
+      await _notificationService.disableDailyQuoteNotifications();
+      if (!mounted) {
+        return;
+      }
+    }
+
     setState(() {
       _notificationsEnabled = value;
     });
+  }
+
+  Future<void> _sendDebugNotification() async {
+    final locale = Localizations.localeOf(context).languageCode;
+    final normalizedLocale = locale == 'ko' ? 'ko' : 'en';
+    final scheduled = await _notificationService
+        .scheduleDebugNotificationIn10Seconds(locale: normalizedLocale);
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          scheduled
+              ? (locale == 'ko'
+                    ? '10초 후 테스트 알림이 예약되었습니다.'
+                    : 'Test notification scheduled in 10 seconds.')
+              : (locale == 'ko'
+                    ? '알림 권한이 필요합니다. 설정에서 권한을 허용해주세요.'
+                    : 'Notification permission is required. Please allow it in settings.'),
+        ),
+      ),
+    );
   }
 
   @override
@@ -62,13 +121,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         children: [
           // Favorites Section
-          _SectionHeader(
-            title: locale == 'ko' ? '좋아요' : 'Favorites',
-          ),
+          _SectionHeader(title: locale == 'ko' ? '좋아요' : 'Favorites'),
           _SettingsItem(
             icon: LucideIcons.heart,
             title: locale == 'ko' ? '좋아요한 명언' : 'Favorite Quotes',
-            subtitle: locale == 'ko' ? '저장한 명언을 모아보세요' : 'View your saved quotes',
+            subtitle: locale == 'ko'
+                ? '저장한 명언을 모아보세요'
+                : 'View your saved quotes',
             onTap: () {
               Navigator.push(
                 context,
@@ -82,9 +141,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: AppDimensions.spacing16),
 
           // Notifications Section
-          _SectionHeader(
-            title: locale == 'ko' ? '알림 설정' : 'Notifications',
-          ),
+          _SectionHeader(title: locale == 'ko' ? '알림 설정' : 'Notifications'),
           _SettingsToggleItem(
             icon: LucideIcons.bell,
             title: locale == 'ko' ? '매일 알림 받기' : 'Daily Notifications',
@@ -94,19 +151,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             value: _notificationsEnabled,
             onChanged: _toggleNotifications,
           ),
+          if (kDebugMode) ...[
+            _SettingsItem(
+              icon: Icons.bug_report_outlined,
+              title: locale == 'ko' ? '10초 후 테스트 알림' : 'Test in 10 Seconds',
+              subtitle: locale == 'ko'
+                  ? '디버그 전용: 랜덤 명언 알림을 10초 후 발송'
+                  : 'Debug only: send a random quote notification in 10 seconds',
+              onTap: _sendDebugNotification,
+            ),
+          ],
 
           const SizedBox(height: AppDimensions.spacing16),
 
           // Info Section
-          _SectionHeader(
-            title: locale == 'ko' ? '정보' : 'Information',
-          ),
+          _SectionHeader(title: locale == 'ko' ? '정보' : 'Information'),
           _SettingsItem(
             icon: LucideIcons.shield,
             title: locale == 'ko' ? '개인정보처리방침' : 'Privacy Policy',
             onTap: () async {
               final url = Uri.parse(
-                  'https://sangheonlee.notion.site/1874f610f08580bd8bcec89e7e7e5fdc');
+                'https://sangheonlee.notion.site/1874f610f08580bd8bcec89e7e7e5fdc',
+              );
               if (await canLaunchUrl(url)) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
               }
@@ -115,7 +181,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _SettingsInfoItem(
             icon: LucideIcons.info,
             title: locale == 'ko' ? '앱 버전' : 'App Version',
-            value: '1.1.0',
+            value: '1.2.0',
           ),
         ],
       ),
@@ -182,11 +248,7 @@ class _SettingsItem extends StatelessWidget {
                 color: AppColors.background,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
               ),
-              child: Icon(
-                icon,
-                size: 20,
-                color: AppColors.foreground,
-              ),
+              child: Icon(icon, size: 20, color: AppColors.foreground),
             ),
             const SizedBox(width: AppDimensions.spacing12),
             Expanded(
@@ -259,11 +321,7 @@ class _SettingsToggleItem extends StatelessWidget {
               color: AppColors.background,
               borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: AppColors.foreground,
-            ),
+            child: Icon(icon, size: 20, color: AppColors.foreground),
           ),
           const SizedBox(width: AppDimensions.spacing12),
           Expanded(
@@ -336,11 +394,7 @@ class _SettingsInfoItem extends StatelessWidget {
               color: AppColors.background,
               borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: AppColors.foreground,
-            ),
+            child: Icon(icon, size: 20, color: AppColors.foreground),
           ),
           const SizedBox(width: AppDimensions.spacing12),
           Expanded(
