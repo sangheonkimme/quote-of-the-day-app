@@ -5,7 +5,6 @@ import { MobileFrame } from "@/components/mobile-frame";
 import { QuoteCard } from "@/components/quote-card";
 import { ActionButtons } from "@/components/action-buttons";
 import { AppHeader } from "@/components/app-header";
-import { AdBanner } from "@/components/ad-banner";
 import { getDailyQuote, getRandomQuote, Quote } from "@/lib/quotes";
 import { useI18n } from "@/lib/i18n-context";
 
@@ -14,6 +13,13 @@ export default function Home() {
   const [quote, setQuote] = useState<Quote>(getDailyQuote);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const featureCards = [
+    t.features.quoteOfDay,
+    t.features.randomRefresh,
+    t.features.share,
+    t.features.notifications,
+    t.features.quotes,
+  ];
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
@@ -60,7 +66,11 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col justify-center px-4 py-6">
-            <QuoteCard quote={quote} isAnimating={isAnimating} locale={locale} />
+            <QuoteCard
+              quote={quote}
+              isAnimating={isAnimating}
+              locale={locale}
+            />
             <ActionButtons
               quote={quote}
               onRefresh={handleRefresh}
@@ -68,9 +78,6 @@ export default function Home() {
               newQuoteLabel={t.newQuote}
             />
           </div>
-
-          {/* Ad Banner (placeholder for monetization) */}
-          <AdBanner label={t.adLabel} />
         </div>
       </MobileFrame>
 
@@ -80,30 +87,18 @@ export default function Home() {
           {t.mvpFeatures}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FeatureCard
-            title={t.features.quoteOfDay.title}
-            description={t.features.quoteOfDay.description}
-          />
-          <FeatureCard
-            title={t.features.randomRefresh.title}
-            description={t.features.randomRefresh.description}
-          />
-          <FeatureCard
-            title={t.features.share.title}
-            description={t.features.share.description}
-          />
-          <FeatureCard
-            title={t.features.notifications.title}
-            description={t.features.notifications.description}
-          />
-          <FeatureCard
-            title={t.features.ads.title}
-            description={t.features.ads.description}
-          />
-          <FeatureCard
-            title={t.features.quotes.title}
-            description={t.features.quotes.description}
-          />
+          {featureCards.map((feature, index) => {
+            const isLastOdd =
+              featureCards.length % 2 === 1 && index === featureCards.length - 1;
+            return (
+              <FeatureCard
+                key={feature.title}
+                title={feature.title}
+                description={feature.description}
+                className={isLastOdd ? "sm:col-span-2" : ""}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -120,9 +115,17 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ title, description }: { title: string; description: string }) {
+function FeatureCard({
+  title,
+  description,
+  className = "",
+}: {
+  title: string;
+  description: string;
+  className?: string;
+}) {
   return (
-    <div className="bg-card rounded-xl p-4 border border-border">
+    <div className={`bg-card rounded-xl p-4 border border-border ${className}`}>
       <h3 className="font-medium text-foreground mb-1">{title}</h3>
       <p className="text-sm text-muted-foreground">{description}</p>
     </div>
