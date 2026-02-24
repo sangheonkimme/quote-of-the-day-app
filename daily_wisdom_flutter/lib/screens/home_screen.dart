@@ -3,14 +3,19 @@ import '../config/theme.dart';
 import '../models/quote.dart';
 import '../services/quote_service.dart';
 import '../services/storage_service.dart';
+import '../services/notification_storage_service.dart';
 import '../widgets/app_header.dart';
 import '../widgets/quote_card.dart';
 import '../widgets/action_buttons.dart';
 import '../widgets/ad_banner.dart';
 import 'settings_screen.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  /// Optional quoteId to display on launch (e.g. from push notification tap).
+  final int? initialQuoteId;
+
+  const HomeScreen({super.key, this.initialQuoteId});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -21,9 +26,12 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isAnimating = false;
   bool _isRefreshing = false;
   bool _isLiked = false;
+  int _unreadNotificationCount = 0;
 
   late QuoteService _quoteService;
   final StorageService _storageService = StorageService();
+  final NotificationStorageService _notificationStorage =
+      NotificationStorageService();
 
   @override
   void didChangeDependencies() {
@@ -31,15 +39,50 @@ class _HomeScreenState extends State<HomeScreen> {
     final locale = Localizations.localeOf(context).languageCode;
     _quoteService = QuoteService(locale: locale);
 
-    // Initialize with daily quote if not already set
     if (!_isInitialized) {
-      _currentQuote = _quoteService.getDailyQuote();
+      // If an initial quoteId was passed (e.g. from push notification),
+      // show that specific quote. Otherwise show daily quote.
+      if (widget.initialQuoteId != null) {
+        _currentQuote = _quoteService.getQuoteById(widget.initialQuoteId!) ??
+            _quoteService.getDailyQuote();
+      } else {
+        _currentQuote = _quoteService.getDailyQuote();
+      }
       _checkLikedStatus();
+      _loadUnreadCount();
       _isInitialized = true;
     }
   }
 
   bool _isInitialized = false;
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final count = await _notificationStorage.getUnreadCount();
+      if (mounted) {
+        setState(() => _unreadNotificationCount = count);
+      }
+    } catch (_) {}
+  }
+
+  /// Navigate to a specific quote by its ID.
+  void _navigateToQuote(int quoteId) {
+    final quote = _quoteService.getQuoteById(quoteId);
+    if (quote != null) {
+      setState(() {
+        _isAnimating = true;
+      });
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          setState(() {
+            _currentQuote = quote;
+            _isAnimating = false;
+          });
+          _checkLikedStatus();
+        }
+      });
+    }
+  }
 
   Future<void> _checkLikedStatus() async {
     final isLiked = await _storageService.isLiked(_currentQuote.id);
@@ -54,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _isAnimating = true;
     });
 
-    // Wait for fade out animation
     await Future.delayed(const Duration(milliseconds: 300));
 
     setState(() {
@@ -80,17 +122,33 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // App Header
             AppHeader(
-              onSettingsTap: () {
-                Navigator.push(
+              unreadCount: _unreadNotificationCount,
+              onNotificationTap: () async {
+                final selectedQuoteId = await Navigator.push<int>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationsScreen(),
+                  ),
+                );
+                // Refresh unread count
+                _loadUnreadCount();
+                // If a notification was tapped, navigate to that quote
+                if (selectedQuoteId != null) {
+                  _navigateToQuote(selectedQuoteId);
+                }
+              },
+              onSettingsTap: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const SettingsScreen(),
                   ),
                 );
+                _loadUnreadCount();
               },
             ),
 
-            // Main Content - Quote Card + Action Buttons
+            // Main Content
             Expanded(
               child: Center(
                 child: Padding(

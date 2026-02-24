@@ -12,6 +12,7 @@ class AdBanner extends StatefulWidget {
 class _AdBannerState extends State<AdBanner> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
+  bool _loadFailed = false;
 
   // Production Ad Unit ID
   static const String _adUnitId = 'ca-app-pub-6553106832525632/6378216132';
@@ -23,22 +24,34 @@ class _AdBannerState extends State<AdBanner> {
   }
 
   void _loadAd() {
-    _bannerAd = BannerAd(
-      adUnitId: _adUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _isLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          debugPrint('BannerAd failed to load: $error');
-          ad.dispose();
-        },
-      ),
-    )..load();
+    try {
+      _bannerAd = BannerAd(
+        adUnitId: _adUnitId,
+        size: AdSize.banner,
+        request: const AdRequest(),
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
+            if (mounted) {
+              setState(() {
+                _isLoaded = true;
+              });
+            }
+          },
+          onAdFailedToLoad: (ad, error) {
+            debugPrint('BannerAd failed to load: $error');
+            ad.dispose();
+            if (mounted) {
+              setState(() {
+                _loadFailed = true;
+              });
+            }
+          },
+        ),
+      )..load();
+    } catch (e) {
+      debugPrint('Ad initialization failed: $e');
+      _loadFailed = true;
+    }
   }
 
   @override
@@ -49,6 +62,11 @@ class _AdBannerState extends State<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
+    // Hide the ad area entirely if loading failed.
+    if (_loadFailed) {
+      return const SizedBox.shrink();
+    }
+
     final locale = Localizations.localeOf(context).languageCode;
 
     return Padding(

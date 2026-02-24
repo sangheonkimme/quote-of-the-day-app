@@ -6,11 +6,13 @@ import '../config/theme.dart';
 class AppHeader extends StatelessWidget {
   final VoidCallback? onNotificationTap;
   final VoidCallback? onSettingsTap;
+  final int unreadCount;
 
   const AppHeader({
     super.key,
     this.onNotificationTap,
     this.onSettingsTap,
+    this.unreadCount = 0,
   });
 
   @override
@@ -61,9 +63,10 @@ class AppHeader extends StatelessWidget {
           // Right: Icon Buttons
           Row(
             children: [
-              // Bell Button - w-10 h-10 rounded-full, ghost style
-              _GhostIconButton(
+              // Bell Button with badge
+              _BadgeIconButton(
                 icon: LucideIcons.bell,
+                badgeCount: unreadCount,
                 onTap: onNotificationTap,
                 semanticLabel: 'Notifications',
               ),
@@ -77,6 +80,74 @@ class AppHeader extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BadgeIconButton extends StatelessWidget {
+  final IconData icon;
+  final int badgeCount;
+  final VoidCallback? onTap;
+  final String semanticLabel;
+
+  const _BadgeIconButton({
+    required this.icon,
+    this.badgeCount = 0,
+    this.onTap,
+    required this.semanticLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: semanticLabel,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDimensions.buttonSizeSm / 2),
+        child: SizedBox(
+          width: AppDimensions.buttonSizeSm, // 40px
+          height: AppDimensions.buttonSizeSm, // 40px
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                icon,
+                size: AppDimensions.iconMd, // 20px
+                color: AppColors.mutedForeground,
+              ),
+              if (badgeCount > 0)
+                Positioned(
+                  top: 4,
+                  right: 2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.heartRed,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      badgeCount > 99 ? '99+' : '$badgeCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

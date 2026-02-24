@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:math';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -5,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../models/notification_item.dart';
+import 'notification_storage_service.dart';
 import 'quote_service.dart';
 
 class NotificationService {
@@ -41,7 +44,9 @@ class NotificationService {
 
   bool _isInitialized = false;
 
-  Future<void> initialize() async {
+  Future<void> initialize({
+    void Function(String?)? onNotificationTap,
+  }) async {
     if (_isInitialized) {
       return;
     }
@@ -63,22 +68,33 @@ class NotificationService {
       macOS: darwinSettings,
     );
 
-    await _plugin.initialize(initSettings);
+    await _plugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: onNotificationTap != null
+          ? (NotificationResponse response) {
+              onNotificationTap(response.payload);
+            }
+          : null,
+    );
     _isInitialized = true;
   }
 
   Future<void> syncDailyQuoteNotifications({required String locale}) async {
-    await initialize();
-    final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool(notificationsEnabledKey) ?? false;
-    if (!enabled) {
-      await _cancelScheduledDailyQuoteNotifications();
-      return;
-    }
+    try {
+      await initialize();
+      final prefs = await SharedPreferences.getInstance();
+      final enabled = prefs.getBool(notificationsEnabledKey) ?? false;
+      if (!enabled) {
+        await _cancelScheduledDailyQuoteNotifications();
+        return;
+      }
 
-    final alreadyScheduled = await _hasScheduledDailyQuotes();
-    if (!alreadyScheduled) {
-      await _scheduleDailyQuoteNotifications(locale: locale);
+      final alreadyScheduled = await _hasScheduledDailyQuotes();
+      if (!alreadyScheduled) {
+        await _scheduleDailyQuoteNotifications(locale: locale);
+      }
+    } catch (e) {
+      debugPrint('syncDailyQuoteNotifications failed: $e');
     }
   }
 
@@ -133,12 +149,14 @@ class NotificationService {
       DateTime.now().add(delay).toUtc(),
       tz.UTC,
     );
+    final title = normalizedLocale == 'ko' ? '테스트 알림' : 'Test Notification';
+    final body = '"${quote.text}" - ${quote.author}';
 
     await _plugin.cancel(_debugNotificationId);
     await _plugin.zonedSchedule(
       _debugNotificationId,
-      normalizedLocale == 'ko' ? '테스트 알림' : 'Test Notification',
-      '"${quote.text}" - ${quote.author}',
+      title,
+      body,
       scheduledDate,
       _defaultNotificationDetails,
       uiLocalNotificationDateInterpretation:
@@ -146,6 +164,15 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       payload: quote.id.toString(),
     );
+
+    // Save to notification history so it appears in the inbox
+    final storage = NotificationStorageService();
+    await storage.addNotification(NotificationItem(
+      quoteId: quote.id,
+      title: title,
+      body: body,
+      scheduledAt: DateTime.now(), // Use current time so it shows immediately
+    ));
     return true;
   }
 
@@ -206,16 +233,22 @@ class NotificationService {
     final quoteService = QuoteService(locale: normalizedLocale);
     final quotes = quoteService.getAllQuotes();
     final firstScheduleDate = _nextEightAm();
+    final storage = NotificationStorageService();
+
+    // Clear old notification history before scheduling new ones
+    await storage.clearAll();
 
     for (int i = 0; i < _daysToSchedule; i++) {
       final localDate = firstScheduleDate.add(Duration(days: i));
       final quote = quotes[_random.nextInt(quotes.length)];
       final scheduledDate = tz.TZDateTime.from(localDate.toUtc(), tz.UTC);
+      final title = normalizedLocale == 'ko' ? '오늘의 명언' : 'Daily Wisdom';
+      final body = '"${quote.text}" - ${quote.author}';
 
       await _plugin.zonedSchedule(
         _notificationIdBase + i,
-        normalizedLocale == 'ko' ? '오늘의 명언' : 'Daily Wisdom',
-        '"${quote.text}" - ${quote.author}',
+        title,
+        body,
         scheduledDate,
         _defaultNotificationDetails,
         uiLocalNotificationDateInterpretation:
@@ -223,6 +256,14 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         payload: quote.id.toString(),
       );
+
+      // Save to notification history for the inbox
+      await storage.addNotification(NotificationItem(
+        quoteId: quote.id,
+        title: title,
+        body: body,
+        scheduledAt: localDate,
+      ));
     }
   }
 

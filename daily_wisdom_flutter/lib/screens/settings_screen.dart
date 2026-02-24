@@ -171,7 +171,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: locale == 'ko' ? '개인정보처리방침' : 'Privacy Policy',
             onTap: () async {
               final url = Uri.parse(
-                'https://sangheonlee.notion.site/1874f610f08580bd8bcec89e7e7e5fdc',
+                'https://quote-of-the-day-app-ten.vercel.app/privacy',
               );
               if (await canLaunchUrl(url)) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
