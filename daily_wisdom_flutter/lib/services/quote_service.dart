@@ -12,12 +12,32 @@ class QuoteService {
 
   /// Get daily quote based on date (same quote all day).
   /// Defaults to today; pass [date] to get the quote for another day.
+  ///
+  /// Walks the whole list without repeats: every quote appears exactly once
+  /// per [_quotes.length] consecutive days. The stride spreads neighbouring
+  /// days across the list so the same category doesn't repeat day after day.
   Quote getDailyQuote([DateTime? date]) {
     final day = date ?? DateTime.now();
-    final seed = day.year * 10000 + day.month * 100 + day.day;
-    final index = seed % _quotes.length;
+    // Calendar days since epoch (UTC avoids DST skew).
+    final dayNumber = DateTime.utc(day.year, day.month, day.day)
+        .difference(DateTime.utc(1970))
+        .inDays;
+    final length = _quotes.length;
+    final index = (dayNumber * _strideFor(length)) % length;
     return _quotes[index];
   }
+
+  /// Smallest stride >= 101 that is coprime with [length], so the walk visits
+  /// every index before repeating.
+  static int _strideFor(int length) {
+    var stride = 101;
+    while (_gcd(stride, length) != 1) {
+      stride++;
+    }
+    return stride;
+  }
+
+  static int _gcd(int a, int b) => b == 0 ? a : _gcd(b, a % b);
 
   /// Get random quote
   Quote getRandomQuote() {
