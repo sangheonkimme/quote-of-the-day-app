@@ -161,7 +161,7 @@ class NotificationService {
       _defaultNotificationDetails,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       payload: quote.id.toString(),
     );
 
@@ -185,10 +185,6 @@ class NotificationService {
         >();
     if (android != null) {
       granted = (await android.requestNotificationsPermission()) ?? true;
-      // Android 14+ requires explicit user grant for exact alarms.
-      final exactGranted =
-          (await android.requestExactAlarmsPermission()) ?? true;
-      granted = granted && exactGranted;
     }
 
     final iOS = _plugin
@@ -257,7 +253,7 @@ class NotificationService {
         _defaultNotificationDetails,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         payload: quote.id.toString(),
       );
 
