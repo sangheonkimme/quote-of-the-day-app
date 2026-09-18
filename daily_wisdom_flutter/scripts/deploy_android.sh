@@ -62,7 +62,14 @@ ACCESS_TOKEN="$(curl -sS --fail-with-body https://oauth2.googleapis.com/token \
   -d grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer \
   -d assertion="$HEADER.$CLAIMS.$SIGNATURE" | json_get "['access_token']")"
 
-api() { curl -sS --fail-with-body -H "Authorization: Bearer $ACCESS_TOKEN" "$@"; }
+api() {
+  local out
+  if ! out="$(curl -sS --fail-with-body -H "Authorization: Bearer $ACCESS_TOKEN" "$@")"; then
+    echo "$out" >&2
+    return 1
+  fi
+  printf '%s' "$out"
+}
 
 # --- 편집(edit) 세션 시작, 다음 versionCode 계산 ---
 EDIT_ID="$(api -X POST "$API/edits" | json_get "['id']")"
