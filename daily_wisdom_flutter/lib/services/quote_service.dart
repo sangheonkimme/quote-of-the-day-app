@@ -10,10 +10,11 @@ class QuoteService {
 
   List<Quote> get _quotes => locale == 'ko' ? quotesKo : quotesEn;
 
-  /// Get daily quote based on date (same quote all day)
-  Quote getDailyQuote() {
-    final today = DateTime.now();
-    final seed = today.year * 10000 + today.month * 100 + today.day;
+  /// Get daily quote based on date (same quote all day).
+  /// Defaults to today; pass [date] to get the quote for another day.
+  Quote getDailyQuote([DateTime? date]) {
+    final day = date ?? DateTime.now();
+    final seed = day.year * 10000 + day.month * 100 + day.day;
     final index = seed % _quotes.length;
     return _quotes[index];
   }

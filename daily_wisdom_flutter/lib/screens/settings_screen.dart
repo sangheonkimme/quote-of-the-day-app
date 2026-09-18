@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/theme.dart';
@@ -16,6 +17,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = false;
+  String _appVersion = '';
   final NotificationService _notificationService = NotificationService.instance;
 
   @override
@@ -26,9 +28,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (!mounted) return;
     setState(() {
       _notificationsEnabled =
           prefs.getBool(NotificationService.notificationsEnabledKey) ?? false;
+      _appVersion = packageInfo.version;
     });
   }
 
@@ -181,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _SettingsInfoItem(
             icon: LucideIcons.info,
             title: locale == 'ko' ? '앱 버전' : 'App Version',
-            value: '1.2.0',
+            value: _appVersion,
           ),
         ],
       ),

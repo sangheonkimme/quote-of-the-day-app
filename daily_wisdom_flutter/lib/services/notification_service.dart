@@ -19,7 +19,15 @@ class NotificationService {
 
   static const int _dailyNotificationHour = 8;
   static const int _notificationIdBase = 8000;
-  static const int _daysToSchedule = 365;
+
+  /// Rolling window: only the next N days are scheduled, and the window is
+  /// refilled every time the app starts. Keeps well under the iOS limit of
+  /// 64 pending notifications.
+  static const int _daysToSchedule = 30;
+
+  /// Older builds scheduled up to 365 days ahead (ids 8000-8364); cancel the
+  /// whole range so leftovers from those builds are cleaned up too.
+  static const int _legacyIdRangeEnd = _notificationIdBase + 365;
   static const int _debugNotificationId = 9000;
   static const String _channelId = 'daily_quote_channel';
   static const String _channelName = 'Daily Quote';
@@ -86,13 +94,13 @@ class NotificationService {
       final enabled = prefs.getBool(notificationsEnabledKey) ?? false;
       if (!enabled) {
         await _cancelScheduledDailyQuoteNotifications();
+        await NotificationStorageService().replaceUpcoming([]);
         return;
       }
 
-      final alreadyScheduled = await _hasScheduledDailyQuotes();
-      if (!alreadyScheduled) {
-        await _scheduleDailyQuoteNotifications(locale: locale);
-      }
+      // Always refill the rolling window so it never runs out while the app
+      // is in use, and so schedules from older builds are replaced.
+      await _scheduleDailyQuoteNotifications(locale: locale);
     } catch (e) {
       debugPrint('syncDailyQuoteNotifications failed: $e');
     }
@@ -114,6 +122,7 @@ class NotificationService {
   Future<void> disableDailyQuoteNotifications() async {
     await initialize();
     await _cancelScheduledDailyQuoteNotifications();
+    await NotificationStorageService().replaceUpcoming([]);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(notificationsEnabledKey, false);
   }
@@ -216,14 +225,6 @@ class NotificationService {
     return granted;
   }
 
-  Future<bool> _hasScheduledDailyQuotes() async {
-    final pending = await _plugin.pendingNotificationRequests();
-    final maxId = _notificationIdBase + _daysToSchedule;
-    return pending.any(
-      (request) => request.id >= _notificationIdBase && request.id < maxId,
-    );
-  }
-
   Future<void> _scheduleDailyQuoteNotifications({
     required String locale,
   }) async {
@@ -231,16 +232,16 @@ class NotificationService {
 
     final normalizedLocale = locale == 'ko' ? 'ko' : 'en';
     final quoteService = QuoteService(locale: normalizedLocale);
-    final quotes = quoteService.getAllQuotes();
     final firstScheduleDate = _nextEightAm();
-    final storage = NotificationStorageService();
-
-    // Clear old notification history before scheduling new ones
-    await storage.clearAll();
+    final upcoming = <NotificationItem>[];
 
     for (int i = 0; i < _daysToSchedule; i++) {
-      final localDate = firstScheduleDate.add(Duration(days: i));
-      final quote = quotes[_random.nextInt(quotes.length)];
+      final base = firstScheduleDate.add(Duration(days: i));
+      // Rebuild from calendar fields so DST shifts don't move it off 8 AM.
+      final localDate =
+          DateTime(base.year, base.month, base.day, _dailyNotificationHour);
+      // Same quote the home screen shows on that day.
+      final quote = quoteService.getDailyQuote(localDate);
       final scheduledDate = tz.TZDateTime.from(localDate.toUtc(), tz.UTC);
       final title = normalizedLocale == 'ko' ? '오늘의 명언' : 'Daily Wisdom';
       final body = '"${quote.text}" - ${quote.author}';
@@ -257,19 +258,25 @@ class NotificationService {
         payload: quote.id.toString(),
       );
 
-      // Save to notification history for the inbox
-      await storage.addNotification(NotificationItem(
+      upcoming.add(NotificationItem(
         quoteId: quote.id,
         title: title,
         body: body,
         scheduledAt: localDate,
       ));
     }
+
+    // Inbox entries appear once their scheduled time passes.
+    await NotificationStorageService().replaceUpcoming(upcoming);
   }
 
   Future<void> _cancelScheduledDailyQuoteNotifications() async {
-    for (int i = 0; i < _daysToSchedule; i++) {
-      await _plugin.cancel(_notificationIdBase + i);
+    final pending = await _plugin.pendingNotificationRequests();
+    for (final request in pending) {
+      if (request.id >= _notificationIdBase &&
+          request.id < _legacyIdRangeEnd) {
+        await _plugin.cancel(request.id);
+      }
     }
   }
 
