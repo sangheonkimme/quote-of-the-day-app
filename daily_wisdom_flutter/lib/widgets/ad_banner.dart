@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/theme.dart';
@@ -14,8 +15,13 @@ class _AdBannerState extends State<AdBanner> {
   bool _isLoaded = false;
   bool _loadFailed = false;
 
-  // Production Ad Unit ID
-  static const String _adUnitId = 'ca-app-pub-6553106832525632/6378216132';
+  // Debug builds use Google's test banner ID so development traffic never hits
+  // the production ad unit (AdMob can suspend accounts for self-impressions).
+  static const String _productionAdUnitId =
+      'ca-app-pub-6553106832525632/6378216132';
+  static const String _testAdUnitId = 'ca-app-pub-3940256099942544/6300978111';
+  static const String _adUnitId =
+      kDebugMode ? _testAdUnitId : _productionAdUnitId;
 
   @override
   void initState() {
