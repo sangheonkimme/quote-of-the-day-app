@@ -310,57 +310,62 @@ class _SettingsToggleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppDimensions.spacing16),
-      padding: const EdgeInsets.all(AppDimensions.spacing16),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+    return GestureDetector(
+      // Tapping anywhere on the row toggles, not just the switch itself
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onChanged(!value),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: AppDimensions.spacing16),
+        padding: const EdgeInsets.all(AppDimensions.spacing16),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+              ),
+              child: Icon(icon, size: 20, color: AppColors.foreground),
             ),
-            child: Icon(icon, size: 20, color: AppColors.foreground),
-          ),
-          const SizedBox(width: AppDimensions.spacing12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: AppTypography.textBase,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.foreground,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+            const SizedBox(width: AppDimensions.spacing12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    subtitle!,
+                    title,
                     style: const TextStyle(
-                      fontSize: AppTypography.textXs,
-                      color: AppColors.mutedForeground,
+                      fontSize: AppTypography.textBase,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.foreground,
                     ),
                   ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        fontSize: AppTypography.textXs,
+                        color: AppColors.mutedForeground,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeTrackColor: AppColors.foreground,
-            activeThumbColor: Colors.white,
-          ),
-        ],
+            Switch(
+              value: value,
+              onChanged: onChanged,
+              activeTrackColor: AppColors.foreground,
+              activeThumbColor: Colors.white,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -43,7 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
       // If an initial quoteId was passed (e.g. from push notification),
       // show that specific quote. Otherwise show daily quote.
       if (widget.initialQuoteId != null) {
-        _currentQuote = _quoteService.getQuoteById(widget.initialQuoteId!) ??
+        _currentQuote =
+            _quoteService.getQuoteById(widget.initialQuoteId!) ??
             _quoteService.getDailyQuote();
       } else {
         _currentQuote = _quoteService.getDailyQuote();
@@ -145,6 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
                 _loadUnreadCount();
+                // Likes may have changed on the favorites screen
+                _checkLikedStatus();
               },
             ),
 
