@@ -161,7 +161,7 @@ class NotificationService {
       _defaultNotificationDetails,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.exactAndAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       payload: quote.id.toString(),
     );
 
@@ -257,7 +257,7 @@ class NotificationService {
         _defaultNotificationDetails,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.exactAndAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: quote.id.toString(),
       );
 
