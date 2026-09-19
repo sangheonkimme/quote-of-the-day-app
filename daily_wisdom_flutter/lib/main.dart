@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -11,6 +13,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _registerFontLicenses();
 
   // Only await lightweight, essential initialization.
   try {
@@ -27,6 +30,18 @@ void main() async {
   _initNotifications();
 
   runApp(const DailyWisdomApp());
+}
+
+/// Bundled fonts are OFL-licensed; list them on the licenses page.
+void _registerFontLicenses() {
+  for (final family in ['Inter', 'PlayfairDisplay']) {
+    LicenseRegistry.addLicense(() async* {
+      final license = await rootBundle.loadString(
+        'assets/fonts/$family/OFL.txt',
+      );
+      yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+    });
+  }
 }
 
 /// Initialize notification service and sync daily quotes in the background.

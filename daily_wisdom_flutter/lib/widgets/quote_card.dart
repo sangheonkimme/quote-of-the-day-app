@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../config/theme.dart';
 import '../models/quote.dart';
+import '../utils/text_utils.dart';
 
 class QuoteCard extends StatelessWidget {
   final Quote quote;
@@ -60,7 +61,7 @@ class QuoteCard extends StatelessWidget {
 
                 // Quote Text - 24sp as shown in design
                 Text(
-                  quote.text,
+                  keepWordsTogether(quote.text),
                   style: GoogleFonts.playfairDisplay(
                     fontSize: quoteFontSize,
                     fontWeight: FontWeight.w400,

@@ -37,7 +37,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final locale = Localizations.localeOf(context).languageCode;
+    final localeChanged = _isInitialized && locale != _quoteService.locale;
     _quoteService = QuoteService(locale: locale);
+
+    // The quote list differs per language, so swap to that language's quote
+    // of the day if the app language changes while running.
+    if (localeChanged) {
+      _currentQuote = _quoteService.getDailyQuote();
+      _checkLikedStatus();
+    }
 
     if (!_isInitialized) {
       // If an initial quoteId was passed (e.g. from push notification),

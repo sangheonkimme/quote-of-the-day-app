@@ -4,6 +4,7 @@ import '../config/theme.dart';
 import '../models/quote.dart';
 import '../services/quote_service.dart';
 import '../services/storage_service.dart';
+import '../utils/text_utils.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -162,7 +163,7 @@ class _FavoriteQuoteCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '"${quote.text}"',
+            '"${keepWordsTogether(quote.text)}"',
             style: const TextStyle(
               fontSize: AppTypography.textBase,
               fontWeight: FontWeight.w500,

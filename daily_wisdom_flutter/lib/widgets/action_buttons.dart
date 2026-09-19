@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:share_plus/share_plus.dart';
 import '../config/theme.dart';
 import '../models/quote.dart';
+import '../services/share_image_service.dart';
 
 class ActionButtons extends StatefulWidget {
   final Quote quote;
@@ -28,6 +28,7 @@ class ActionButtons extends StatefulWidget {
 class _ActionButtonsState extends State<ActionButtons>
     with SingleTickerProviderStateMixin {
   bool _copied = false;
+  bool _sharing = false;
   late AnimationController _refreshController;
 
   @override
@@ -70,8 +71,20 @@ class _ActionButtonsState extends State<ActionButtons>
   }
 
   Future<void> _handleShare() async {
-    final shareText = '"${widget.quote.text}" - ${widget.quote.author}';
-    await Share.share(shareText);
+    if (_sharing) return; // image rendering takes a moment; ignore double taps
+    _sharing = true;
+    try {
+      // iPad needs an anchor for the share popover.
+      final box = context.findRenderObject() as RenderBox?;
+      await ShareImageService.shareQuote(
+        context,
+        widget.quote,
+        sharePositionOrigin:
+            box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      );
+    } finally {
+      _sharing = false;
+    }
   }
 
   @override
