@@ -9,6 +9,8 @@
 #   --locales ko,en        언어 (기본 ko,en)
 #   --formats feed,story   feed=1080x1350(4:5), story=1080x1920(9:16)
 #   --out build/cards      저장 위치 (기본 build/cards)
+#   --quotes cards.json    직접 고른 명언 목록으로 카드 생성 (날짜별 자동 선택 대신)
+#                          [{"name","text","author","category","format","appName"}]
 #
 # 앱의 공유 카드 위젯을 그대로 써서 앱에서 공유한 것과 똑같은 이미지가 나온다.
 # macOS 앱으로 잠깐 실행되며, 샌드박스 안에 만든 파일을 --out 위치로 복사한다.
@@ -20,6 +22,7 @@ START=""
 LOCALES="ko,en"
 FORMATS="feed,story"
 OUT="build/cards"
+QUOTES=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -28,6 +31,7 @@ while [ $# -gt 0 ]; do
     --locales) LOCALES="$2"; shift 2 ;;
     --formats) FORMATS="$2"; shift 2 ;;
     --out) OUT="$2"; shift 2 ;;
+    --quotes) QUOTES="$2"; shift 2 ;;
     *) echo "알 수 없는 인자: $1" >&2; exit 1 ;;
   esac
 done
@@ -37,8 +41,17 @@ cd "$(dirname "$0")/.."
 LOG="$(mktemp)"
 trap 'rm -f "$LOG"' EXIT
 
-echo "▶ ${DAYS}일치 카드 생성 중 (${LOCALES} / ${FORMATS})..."
+QUOTES_B64=""
+if [ -n "$QUOTES" ]; then
+  [ -f "$QUOTES" ] || { echo "명언 목록 파일을 찾을 수 없습니다: $QUOTES" >&2; exit 1; }
+  QUOTES_B64="$(base64 -i "$QUOTES" | tr -d '\n')"
+  echo "▶ 지정한 명언으로 카드 생성 중 ($QUOTES)..."
+else
+  echo "▶ ${DAYS}일치 카드 생성 중 (${LOCALES} / ${FORMATS})..."
+fi
+
 flutter run -d macos -t lib/tools/export_cards.dart \
+  --dart-define=QUOTES_B64="$QUOTES_B64" \
   --dart-define=DAYS="$DAYS" \
   --dart-define=START="$START" \
   --dart-define=LOCALES="$LOCALES" \

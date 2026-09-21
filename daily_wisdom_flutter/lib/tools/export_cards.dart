@@ -9,8 +9,12 @@
 ///   START=2026-09-21   first day (defaults to today)
 ///   LOCALES=ko,en      which languages
 ///   FORMATS=feed,story feed = 1080x1350 (4:5), story = 1080x1920 (9:16)
+///   QUOTES_B64=…        base64 of a JSON list of hand-picked quotes; when set,
+///                       these are rendered instead of the daily ones. Each item:
+///                       {"name","text","author","category","format"}
 library;
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -27,6 +31,7 @@ const _days = int.fromEnvironment('DAYS', defaultValue: 30);
 const _start = String.fromEnvironment('START');
 const _locales = String.fromEnvironment('LOCALES', defaultValue: 'ko,en');
 const _formats = String.fromEnvironment('FORMATS', defaultValue: 'feed,story');
+const _quotesB64 = String.fromEnvironment('QUOTES_B64');
 const _pixelRatio = 3.0; // 360x450 -> 1080x1350, 360x640 -> 1080x1920
 
 void main() {
@@ -62,6 +67,13 @@ class _ExporterAppState extends State<_ExporterApp> {
 
       final firstDay = _start.isEmpty ? DateTime.now() : DateTime.parse(_start);
       var written = 0;
+
+      if (_quotesB64.isNotEmpty) {
+        written = await _exportPicked(outDir);
+        stdout.writeln('[export] wrote $written files to ${outDir.path}');
+        stdout.writeln('[export] DONE');
+        exit(0);
+      }
 
       for (final locale in _locales.split(',')) {
         final service = QuoteService(locale: locale.trim());
@@ -103,6 +115,37 @@ class _ExporterAppState extends State<_ExporterApp> {
       exit(1);
     }
     exit(0);
+  }
+
+  /// Renders a hand-written list of quotes (marketing cards) instead of the
+  /// app's daily rotation.
+  Future<int> _exportPicked(Directory outDir) async {
+    final items = (jsonDecode(utf8.decode(base64Decode(_quotesB64))) as List)
+        .cast<Map<String, dynamic>>();
+    var written = 0;
+
+    for (final item in items) {
+      final isStory = (item['format'] as String? ?? 'feed') == 'story';
+      final quote = Quote(
+        id: 0,
+        text: item['text'] as String,
+        author: item['author'] as String,
+        category: item['category'] as String? ?? '',
+      );
+      final file = File('${outDir.path}/picked/${item['name']}.png')
+        ..createSync(recursive: true);
+
+      setState(() => _status = 'writing ${item['name']}');
+      file.writeAsBytesSync(
+        await _render(
+          quote,
+          item['appName'] as String? ?? 'Daily Wisdom',
+          isStory ? ShareCard.storySize : ShareCard.size,
+        ),
+      );
+      written++;
+    }
+    return written;
   }
 
   Future<Uint8List> _render(Quote quote, String appName, Size size) async {
