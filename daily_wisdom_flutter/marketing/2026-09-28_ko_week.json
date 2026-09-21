@@ -1,0 +1,23 @@
+[
+  {"name": "ig01_0928_mon_jimrohn", "format": "feed", "appName": "오늘의 명언", "author": "짐 론", "category": "동기부여",
+   "text": "당신이 하루를 지배하거나 하루가 당신을 지배한다."},
+  {"name": "ig02_0929_tue_elliot", "format": "feed", "appName": "오늘의 명언", "author": "월터 엘리엇", "category": "인내",
+   "text": "인내는 긴 경주가 아니라 짧은 경주의 연속이다."},
+  {"name": "ig03_0930_wed_wooden", "format": "feed", "appName": "오늘의 명언", "author": "존 우든", "category": "일",
+   "text": "빠르되, 서두르지 마라."},
+  {"name": "ig04_1001_thu_proverb", "format": "feed", "appName": "오늘의 명언", "author": "중국 속담", "category": "행동",
+   "text": "나무 심기 가장 좋은 때는 20년 전이었다. 두 번째로 좋은 때는 지금이다."},
+  {"name": "ig05_1002_fri_redmoon", "format": "feed", "appName": "오늘의 명언", "author": "앰브로즈 레드문", "category": "용기",
+   "text": "용기란 두려움이 없는 게 아니라 다른 것이 더 중요하다고 판단하는 것이다."},
+  {"name": "ig06_1003_sat_twain", "format": "feed", "appName": "오늘의 명언", "author": "마크 트웨인", "category": "용기",
+   "text": "용기는 두려움의 부재가 아니라 두려움의 극복이다."},
+  {"name": "ig07_1004_sun_psalm56", "format": "feed", "appName": "오늘의 명언", "author": "시편 56:3", "category": "성경",
+   "text": "내가 두려워하는 날에는 주를 의지하리이다"},
+
+  {"name": "reels_A_0929_proverb_story", "format": "story", "appName": "오늘의 명언", "author": "일본 속담", "category": "인내",
+   "text": "일곱 번 넘어지면 여덟 번 일어나라."},
+  {"name": "reels_B_1001_jobs_story", "format": "story", "appName": "오늘의 명언", "author": "스티브 잡스", "category": "삶",
+   "text": "시간은 한정되어 있다. 남의 인생을 사느라 낭비하지 마라."},
+  {"name": "reels_C_1004_thess_story", "format": "story", "appName": "오늘의 명언", "author": "데살로니가후서 3:13", "category": "성경",
+   "text": "형제들아 너희는 선을 행하다가 낙심치 말라"}
+]
