@@ -9,13 +9,24 @@ import '../utils/text_utils.dart';
 /// Laid out at [size] logical pixels; captured at 3x for a 1080x1350
 /// (4:5, Instagram feed friendly) PNG.
 class ShareCard extends StatelessWidget {
+  /// 4:5, the default used by the in-app share button.
   static const Size size = Size(360, 450);
+
+  /// 9:16, for stories and short-form video backgrounds.
+  static const Size storySize = Size(360, 640);
+
   static const String appIconAsset = 'assets/icons/icon.png';
 
   final Quote quote;
   final String appName;
+  final Size cardSize;
 
-  const ShareCard({super.key, required this.quote, required this.appName});
+  const ShareCard({
+    super.key,
+    required this.quote,
+    required this.appName,
+    this.cardSize = size,
+  });
 
   /// Shorter quotes get bigger type; FittedBox below is the safety net.
   static double _quoteFontSize(String text) {
@@ -26,8 +37,9 @@ class ShareCard extends StatelessWidget {
     return 19;
   }
 
-  static TextStyle quoteStyle(String text) => GoogleFonts.playfairDisplay(
-    fontSize: _quoteFontSize(text),
+  static TextStyle quoteStyle(String text, {double scale = 1}) =>
+      GoogleFonts.playfairDisplay(
+    fontSize: _quoteFontSize(text) * scale,
     fontWeight: FontWeight.w400,
     color: AppColors.foreground,
     height: 1.45,
@@ -49,13 +61,15 @@ class ShareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     const outerPadding = 24.0;
     const innerPadding = 28.0;
-    const textWidth = 360 - 2 * (outerPadding + innerPadding);
+    final textWidth = cardSize.width - 2 * (outerPadding + innerPadding);
+    // Taller cards (9:16 stories) get proportionally bigger type.
+    final scale = (cardSize.height / size.height).clamp(1.0, 1.3);
 
     // Keep the layout fixed regardless of the user's system text size.
     return MediaQuery.withNoTextScaling(
       child: Container(
-        width: size.width,
-        height: size.height,
+        width: cardSize.width,
+        height: cardSize.height,
         color: AppColors.background,
         padding: const EdgeInsets.fromLTRB(
           outerPadding,
@@ -80,7 +94,7 @@ class ShareCard extends StatelessWidget {
                     Text(
                       '“',
                       style: GoogleFonts.playfairDisplay(
-                        fontSize: 56,
+                        fontSize: 56 * scale,
                         height: 0.9,
                         color: AppColors.mutedForeground.withValues(alpha: 0.3),
                       ),
@@ -95,7 +109,7 @@ class ShareCard extends StatelessWidget {
                             width: textWidth,
                             child: Text(
                               keepWordsTogether(quote.text),
-                              style: quoteStyle(quote.text),
+                              style: quoteStyle(quote.text, scale: scale),
                             ),
                           ),
                         ),
